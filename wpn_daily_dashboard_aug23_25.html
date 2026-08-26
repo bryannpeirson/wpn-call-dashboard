@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WPN Daily Monitor — Aug 23–25, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal:     #006271;
+  --teal-lt:  #e4eff0;
+  --gold:     #e2bc5c;
+  --gold-lt:  #fdf6e3;
+  --dark:     #00272d;
+  --red:      #c0392b;
+  --red-lt:   #fee2e2;
+  --amber:    #f59e0b;
+  --amber-lt: #fef3c7;
+  --green:    #16a34a;
+  --green-lt: #dcfce7;
+  --border:   #e4e8ec;
+  --bg:       #f4f6f8;
+  --white:    #ffffff;
+  --text:     #1a2a2d;
+  --muted:    #6b7f86;
+  --font:     'Montserrat', sans-serif;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* Header */
+.header { background: var(--dark); padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
+.header-logo { width: 40px; height: 40px; }
+.header-title { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: .06em; }
+.header-sub   { font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+.header-right { margin-left: auto; text-align: right; }
+.header-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(226,188,92,.15); border: 1px solid rgba(226,188,92,.3); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: .04em; }
+.alert-banner { background: var(--red-lt); border-bottom: 2px solid #fca5a5; padding: 10px 32px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: var(--red); }
+
+/* Page */
+.page { padding: 24px 32px 48px; max-width: 1100px; margin: 0 auto; }
+
+/* Summary strip */
+.summary-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 24px; }
+.sc { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(--gold); }
+.sc-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 5px; }
+.sc-value { font-size: 26px; font-weight: 800; line-height: 1; }
+.sc-value.red  { color: var(--red); }
+.sc-value.teal { color: var(--teal); }
+.sc-sub   { font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+/* Day tabs */
+.day-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+.day-tab { padding: 10px 22px; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: .15s; white-space: nowrap; }
+.day-tab:hover { color: var(--text); }
+.day-tab.active { color: var(--teal); border-bottom-color: var(--gold); }
+.day-tab .tab-nc { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
+.tab-nc.bad  { background: var(--red-lt);   color: var(--red); }
+.tab-nc.mid  { background: var(--amber-lt); color: #92400e; }
+.tab-nc.good { background: var(--green-lt); color: var(--green); }
+
+/* Cards */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-bottom: 1px solid var(--border); background: #fafbfc; }
+.panel-title  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.panel-dot    { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.panel-meta   { font-size: 10px; font-weight: 600; color: var(--muted); }
+.panel-body   { padding: 14px 16px; }
+
+/* Hourly bar chart wrapper */
+.chart-wrap { position: relative; height: 200px; }
+
+/* Outcome badges */
+.badge-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); background: #fafbfc; }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; }
+.dot  { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.b-c  { background: var(--green-lt); color: #166534; } .d-c  { background: #16a34a; }
+.b-vm { background: var(--amber-lt); color: #92400e; } .d-vm { background: var(--amber); }
+.b-a  { background: var(--red-lt);   color: #991b1b; } .d-a  { background: var(--red); }
+
+/* Queue table */
+.queue-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.queue-table thead tr { background: var(--dark); }
+.queue-table thead th { padding: 8px 12px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.queue-table thead th.r { text-align: right; }
+.queue-table tbody tr { border-bottom: 1px solid var(--border); }
+.queue-table tbody tr:last-child { border-bottom: none; }
+.queue-table tbody tr:hover { background: #f0f8f9; }
+.queue-table tbody td { padding: 8px 12px; color: var(--text); font-weight: 500; vertical-align: middle; }
+.queue-table tbody td.r { text-align: right; }
+.nc-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 9px; font-weight: 700; }
+.pill-red   { background: var(--red-lt);   color: #991b1b; }
+.pill-amber { background: var(--amber-lt); color: #92400e; }
+.pill-green { background: var(--green-lt); color: #166534; }
+.nc-bar-wrap { width: 70px; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; display: inline-block; margin-right: 6px; vertical-align: middle; }
+.nc-bar-fill { height: 100%; border-radius: 99px; }
+
+/* Day note */
+.day-note { font-size: 11px; color: var(--muted); border-left: 3px solid var(--gold); padding: 8px 12px; background: var(--gold-lt); border-radius: 0 6px 6px 0; margin-bottom: 14px; font-weight: 500; line-height: 1.6; }
+.day-note strong { color: var(--text); }
+
+.footer { text-align: center; font-size: 10px; color: var(--muted); padding: 16px 0 4px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">WPN — Daily Monitor</div>
+    <div class="header-sub">Central Time &nbsp;·&nbsp; Inbound Calls Only</div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">Aug 23 – 25, 2026</div>
+  </div>
+</div>
+<div class="alert-banner">
+  ⚠ &nbsp;WPN is under active monitoring. NC rate exceeded 40% on all three days this period. Review staffing and ZCC overflow routing.
+</div>
+
+<div class="page">
+
+  <!-- Summary strip -->
+  <div class="summary-row">
+    <div class="sc">
+      <div class="sc-label">Total calls</div>
+      <div class="sc-value teal">137</div>
+      <div class="sc-sub">Aug 23–25, 2026</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Completed</div>
+      <div class="sc-value teal">60</div>
+      <div class="sc-sub">44% of calls</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Not Completed</div>
+      <div class="sc-value red">77</div>
+      <div class="sc-sub">56% of calls</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Worst day</div>
+      <div class="sc-value red" style="font-size:18px">Sun 8/23</div>
+      <div class="sc-sub">75% NC rate · 56 calls</div>
+    </div>
+  </div>
+
+  <!-- Day tabs -->
+  <div class="day-tabs">
+    <div class="day-tab active" data-day="0" onclick="switchDay(0)">
+      Sun, Aug 23 <span class="tab-nc bad">75% NC</span>
+    </div>
+    <div class="day-tab" data-day="1" onclick="switchDay(1)">
+      Mon, Aug 24 <span class="tab-nc mid">40% NC</span>
+    </div>
+    <div class="day-tab" data-day="2" onclick="switchDay(2)">
+      Tue, Aug 25 <span class="tab-nc mid">46% NC</span>
+    </div>
+  </div>
+
+  <div id="dayContent"></div>
+
+  <div class="footer">Northgate Resorts &nbsp;·&nbsp; WPN Daily Monitor &nbsp;·&nbsp; Aug 23–25, 2026 &nbsp;·&nbsp; Central Time</div>
+</div>
+
+<script>
+const HL={8:'8a',9:'9a',10:'10a',11:'11a',12:'12p',13:'1p',14:'2p',15:'3p',16:'4p',17:'5p',18:'6p',19:'7p',20:'8p',21:'9p'};
+
+const DAYS=[
+  {
+    label:'Sunday, Aug 23',
+    total:56, completed:14, voicemail:41, abandoned:1, nc:42,
+    note:'<strong>Worst day of the period.</strong> 75% NC — 41 of 56 calls went to voicemail. The 11a–1p window was the most severe: 35 calls with only 3 completing. WPN New Reservation and ZCC Overflow are the primary problem queues. Sunday staffing appears critically insufficient for incoming volume.',
+    hours:[
+      {h:9,  total:4,  completed:1, voicemail:2, abandoned:1},
+      {h:10, total:4,  completed:2, voicemail:2, abandoned:0},
+      {h:11, total:14, completed:2, voicemail:12,abandoned:0},
+      {h:12, total:10, completed:1, voicemail:9, abandoned:0},
+      {h:13, total:11, completed:0, voicemail:11,abandoned:0},
+      {h:14, total:9,  completed:6, voicemail:3, abandoned:0},
+      {h:15, total:1,  completed:1, voicemail:0, abandoned:0},
+      {h:16, total:3,  completed:1, voicemail:2, abandoned:0},
+    ],
+    queues:[
+      {name:'WPN New Reservation',   total:23, completed:7,  voicemail:16, abandoned:0},
+      {name:'WPN ZCC Overflow',       total:14, completed:1,  voicemail:13, abandoned:0},
+      {name:'WPN In Park',            total:10, completed:4,  voicemail:6,  abandoned:0},
+      {name:'WPN Modify Reservation', total:6,  completed:1,  voicemail:4,  abandoned:1},
+      {name:'WPN Extended Stay',      total:3,  completed:1,  voicemail:2,  abandoned:0},
+    ]
+  },
+  {
+    label:'Monday, Aug 24',
+    total:42, completed:25, voicemail:16, abandoned:1, nc:17,
+    note:'<strong>Best day of the period</strong> but still at 40% NC. Morning hours (9a–12p) performed well — 12 of 20 calls completed. Afternoon weakened significantly: 2p hour had 7 calls with only 2 completing, and 4p dropped to 1-in-3. ZCC Overflow continues to underperform (3 of 8 completed).',
+    hours:[
+      {h:9,  total:5,  completed:3, voicemail:2, abandoned:0},
+      {h:10, total:5,  completed:3, voicemail:2, abandoned:0},
+      {h:11, total:3,  completed:3, voicemail:0, abandoned:0},
+      {h:12, total:3,  completed:3, voicemail:0, abandoned:0},
+      {h:13, total:6,  completed:5, voicemail:1, abandoned:0},
+      {h:14, total:7,  completed:2, voicemail:5, abandoned:0},
+      {h:15, total:4,  completed:3, voicemail:1, abandoned:0},
+      {h:16, total:9,  completed:3, voicemail:5, abandoned:1},
+    ],
+    queues:[
+      {name:'WPN New Reservation',   total:17, completed:10, voicemail:7,  abandoned:0},
+      {name:'WPN Modify Reservation',total:11, completed:8,  voicemail:3,  abandoned:0},
+      {name:'WPN ZCC Overflow',       total:8,  completed:3,  voicemail:5,  abandoned:0},
+      {name:'WPN In Park',            total:4,  completed:2,  voicemail:1,  abandoned:1},
+      {name:'WPN Extended Stay',      total:2,  completed:2,  voicemail:0,  abandoned:0},
+    ]
+  },
+  {
+    label:'Tuesday, Aug 25',
+    total:39, completed:21, voicemail:15, abandoned:3, nc:18,
+    note:'<strong>46% NC</strong> — an improvement over Sunday but below acceptable range. The 3p hour was the worst: 8 calls with only 1 completing and 2 abandoned. WPN New Reservation drove most of the volume (23 calls) and had a high voicemail/abandon rate in the afternoon. ZCC Overflow split evenly — 4 completed, 4 voicemail.',
+    hours:[
+      {h:9,  total:3,  completed:2, voicemail:1, abandoned:0},
+      {h:10, total:3,  completed:2, voicemail:1, abandoned:0},
+      {h:11, total:2,  completed:2, voicemail:0, abandoned:0},
+      {h:12, total:4,  completed:3, voicemail:1, abandoned:0},
+      {h:13, total:9,  completed:6, voicemail:3, abandoned:0},
+      {h:14, total:5,  completed:3, voicemail:2, abandoned:0},
+      {h:15, total:8,  completed:1, voicemail:5, abandoned:2},
+      {h:16, total:5,  completed:2, voicemail:2, abandoned:1},
+    ],
+    queues:[
+      {name:'WPN New Reservation',   total:23, completed:12, voicemail:8,  abandoned:3},
+      {name:'WPN ZCC Overflow',       total:8,  completed:4,  voicemail:4,  abandoned:0},
+      {name:'WPN Extended Stay',      total:3,  completed:1,  voicemail:2,  abandoned:0},
+      {name:'WPN Modify Reservation', total:4,  completed:3,  voicemail:1,  abandoned:0},
+      {name:'WPN In Park',            total:1,  completed:1,  voicemail:0,  abandoned:0},
+    ]
+  }
+];
+
+let hChart=null, active=0;
+
+function ncColor(nc,total){
+  const r=total?Math.round(nc/total*100):0;
+  return r>=40?'#c0392b':r>=20?'#f59e0b':'#16a34a';
+}
+function ncPillClass(r){ return r>=40?'pill-red':r>=20?'pill-amber':'pill-green'; }
+
+function buildDay(idx){
+  const d=DAYS[idx];
+  const ncPct=Math.round(d.nc/d.total*100);
+
+  let qrows='';
+  d.queues.forEach(q=>{
+    const r=q.total?Math.round((q.voicemail+q.abandoned)/q.total*100):0;
+    const fillColor=ncColor(q.voicemail+q.abandoned,q.total);
+    const shortName=q.name.replace('WPN ','');
+    qrows+=`<tr>
+      <td><strong>${shortName}</strong></td>
+      <td class="r">${q.total}</td>
+      <td class="r">${q.completed}</td>
+      <td class="r">${q.voicemail}</td>
+      <td class="r">${q.abandoned}</td>
+      <td>
+        <span class="nc-bar-wrap"><span class="nc-bar-fill" style="width:${Math.min(r,100)}%;background:${fillColor}"></span></span>
+        <span class="nc-pill ${ncPillClass(r)}">${r}%</span>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById('dayContent').innerHTML=`
+    <div class="day-note">📋 ${d.note}</div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--teal)"></span>Calls by hour (CT)</div>
+          <div class="panel-meta">${d.total} total</div>
+        </div>
+        <div class="panel-body"><div class="chart-wrap"><canvas id="hourChart"></canvas></div></div>
+        <div class="badge-row">
+          <span class="badge b-c"><span class="dot d-c"></span>Completed: ${d.completed} (${Math.round(d.completed/d.total*100)}%)</span>
+          <span class="badge b-vm"><span class="dot d-vm"></span>Voicemail/Overflow: ${d.voicemail} (${Math.round(d.voicemail/d.total*100)}%)</span>
+          <span class="badge b-a"><span class="dot d-a"></span>Abandoned: ${d.abandoned} (${Math.round(d.abandoned/d.total*100)}%)</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="panel-dot" style="background:var(--red)"></span>Not completed by hour</div>
+          <div class="panel-meta">${d.nc} calls · ${ncPct}% NC</div>
+        </div>
+        <div class="panel-body"><div class="chart-wrap"><canvas id="ncChart"></canvas></div></div>
+        <div class="badge-row">
+          <span class="badge b-vm"><span class="dot d-vm"></span>Voicemail/Overflow: ${d.voicemail}</span>
+          <span class="badge b-a"><span class="dot d-a"></span>Abandoned: ${d.abandoned}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="panel-header">
+        <div class="panel-title"><span class="panel-dot" style="background:var(--gold)"></span>Queue breakdown</div>
+        <div class="panel-meta">${d.queues.length} queues</div>
+      </div>
+      <table class="queue-table">
+        <thead><tr>
+          <th>Queue</th>
+          <th class="r">Total</th>
+          <th class="r">Completed</th>
+          <th class="r">Voicemail/OVF</th>
+          <th class="r">Abandoned</th>
+          <th>NC Rate</th>
+        </tr></thead>
+        <tbody>${qrows}</tbody>
+      </table>
+    </div>`;
+
+  const hours=d.hours.map(h=>h.h);
+  const totals=d.hours.map(h=>h.total);
+  const completed=d.hours.map(h=>h.completed);
+  const ncs=d.hours.map(h=>h.voicemail+h.abandoned);
+  const maxTotal=Math.max(...totals)||1;
+
+  if(hChart) hChart.destroy();
+  hChart=new Chart(document.getElementById('hourChart'),{
+    type:'bar',
+    data:{
+      labels:hours.map(h=>HL[h]||h),
+      datasets:[
+        {label:'Completed',data:completed,backgroundColor:'#16a34a',borderRadius:3,stack:'s'},
+        {label:'Voicemail/OVF',data:d.hours.map(h=>h.voicemail),backgroundColor:'#f59e0b',borderRadius:0,stack:'s'},
+        {label:'Abandoned',data:d.hours.map(h=>h.abandoned),backgroundColor:'#c0392b',borderRadius:0,stack:'s'},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9,family:'Montserrat'},boxWidth:10,padding:8}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true},
+              y:{grid:{color:'rgba(0,39,45,.05)'},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true}}}
+  });
+
+  const ncMax=Math.max(...ncs)||1;
+  const ncChart2=Chart.getChart('ncChart'); if(ncChart2)ncChart2.destroy();
+  new Chart(document.getElementById('ncChart'),{
+    type:'bar',
+    data:{
+      labels:hours.map(h=>HL[h]||h),
+      datasets:[
+        {label:'Voicemail/OVF',data:d.hours.map(h=>h.voicemail),backgroundColor:'#f59e0b',borderRadius:3,stack:'s'},
+        {label:'Abandoned',data:d.hours.map(h=>h.abandoned),backgroundColor:'#c0392b',borderRadius:0,stack:'s'},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9,family:'Montserrat'},boxWidth:10,padding:8}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true},
+              y:{grid:{color:'rgba(0,39,45,.05)'},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true}}}
+  });
+}
+
+function switchDay(idx){
+  active=idx;
+  document.querySelectorAll('.day-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  buildDay(idx);
+}
+
+buildDay(0);
+</script>
+</body>
+</html>
