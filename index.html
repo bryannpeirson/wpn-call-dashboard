@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WPN Call Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal:    #006271;
+  --teal-lt: #e4eff0;
+  --gold:    #e2bc5c;
+  --dark:    #00272d;
+  --red:     #c0392b;
+  --red-lt:  #fee2e2;
+  --amber:   #f59e0b;
+  --amber-lt:#fef3c7;
+  --green-lt:#dcfce7;
+  --border:  #e4e8ec;
+  --bg:      #f4f6f8;
+  --white:   #ffffff;
+  --text:    #1a2a2d;
+  --muted:   #6b7f86;
+  --font:    'Montserrat', sans-serif;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.header { background: var(--dark); padding: 24px 40px; display: flex; align-items: center; gap: 16px; }
+.header-title { font-size: 20px; font-weight: 800; color: var(--white); letter-spacing: .06em; text-transform: uppercase; }
+.header-sub   { font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: .1em; text-transform: uppercase; margin-top: 3px; }
+.status-pill  { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; background: rgba(192,57,43,.2); border: 1px solid rgba(192,57,43,.4); border-radius: 20px; padding: 5px 14px; font-size: 11px; font-weight: 700; color: #f87171; letter-spacing: .04em; flex-shrink: 0; }
+.status-dot   { width: 7px; height: 7px; border-radius: 50%; background: #f87171; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.page { padding: 28px 40px 56px; max-width: 860px; margin: 0 auto; }
+
+.card-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.dash-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: box-shadow .15s, transform .15s; }
+.dash-card:hover { box-shadow: 0 6px 20px rgba(0,39,45,.12); transform: translateY(-2px); }
+.card-top { background: var(--dark); padding: 14px 18px 12px; display: flex; align-items: flex-start; justify-content: space-between; }
+.card-week { font-size: 14px; font-weight: 700; color: var(--white); }
+.card-sub  { font-size: 10px; font-weight: 500; color: rgba(255,255,255,.6); margin-top: 2px; }
+.card-badge { font-size: 9px; font-weight: 700; letter-spacing: .06em; padding: 3px 9px; border-radius: 10px; text-transform: uppercase; flex-shrink: 0; background: rgba(192,57,43,.25); color: #f87171; }
+.card-body { padding: 14px 18px 16px; flex: 1; }
+.card-desc { font-size: 11px; color: var(--text); line-height: 1.6; font-weight: 500; margin-bottom: 12px; }
+.stat-row  { display: flex; gap: 7px; flex-wrap: wrap; }
+.stat-chip { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 99px; }
+.chip-red   { background: var(--red-lt);   color: #991b1b; }
+.chip-amber { background: var(--amber-lt); color: #92400e; }
+.chip-teal  { background: var(--teal-lt);  color: var(--teal); }
+.chip-green { background: var(--green-lt); color: #166534; }
+.card-footer { padding: 10px 18px; border-top: 1px solid var(--border); background: #fafbfc; display: flex; align-items: center; justify-content: space-between; }
+.card-cta   { font-size: 11px; font-weight: 700; color: var(--teal); }
+.card-arrow { font-size: 16px; color: var(--teal); font-weight: 700; }
+
+@media(max-width:600px){ .card-grid{grid-template-columns:1fr} .header,.page{padding-left:20px;padding-right:20px} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">WPN Call Dashboard</div>
+    <div class="header-sub">Central Time &nbsp;·&nbsp; Inbound Calls</div>
+  </div>
+  <div class="status-pill"><span class="status-dot"></span>Under Active Monitoring</div>
+</div>
+
+<div class="page">
+  <div class="card-grid">
+
+    <a class="dash-card" href="wpn_daily_dashboard_aug23_25.html">
+      <div class="card-top">
+        <div>
+          <div class="card-week">Aug 23 – 25, 2026</div>
+          <div class="card-sub">Sunday · Monday · Tuesday</div>
+        </div>
+        <span class="card-badge">Daily</span>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">Hourly breakdown with queue detail for each day. Sunday 8/23 was the most severe — 75% NC with the mid-morning window nearly completely overwhelmed.</div>
+        <div class="stat-row">
+          <span class="stat-chip chip-teal">137 calls</span>
+          <span class="stat-chip chip-red">Sun 75% NC</span>
+          <span class="stat-chip chip-amber">Mon 40% NC</span>
+          <span class="stat-chip chip-amber">Tue 46% NC</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-cta">View report</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- NEW CARDS GO HERE -->
+
+  </div>
+</div>
+
+</body>
+</html>
