@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WPN Daily Monitor — Aug 2–25, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#006271;--teal-lt:#e4eff0;--gold:#e2bc5c;--gold-lt:#fdf6e3;--dark:#00272d;--red:#c0392b;--red-lt:#fee2e2;--amber:#f59e0b;--amber-lt:#fef3c7;--green:#16a34a;--green-lt:#dcfce7;--border:#e4e8ec;--bg:#f4f6f8;--white:#fff;--text:#1a2a2d;--muted:#6b7f86;--font:'Montserrat',sans-serif}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--dark);padding:22px 32px;display:flex;align-items:center;gap:16px}
+.header-title{font-size:18px;font-weight:800;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.header-sub{font-size:10px;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.status-pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;color:#f87171;flex-shrink:0}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#f87171;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.alert{background:var(--red-lt);border-bottom:2px solid #fca5a5;padding:9px 32px;font-size:12px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:8px}
+.page{padding:22px 32px 48px;max-width:1100px;margin:0 auto}
+.summary-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:22px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:13px 16px;border-top:3px solid var(--gold)}
+.sc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px}
+.sc-value{font-size:26px;font-weight:800;line-height:1}
+.sc-value.red{color:var(--red)}.sc-value.teal{color:var(--teal)}.sc-value.green{color:var(--green)}
+.sc-sub{font-size:10px;color:var(--muted);margin-top:4px;font-weight:500}
+.trend-panel{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);background:#fafbfc}
+.panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:7px}
+.panel-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.panel-meta{font-size:10px;font-weight:600;color:var(--muted)}
+.panel-body{padding:16px}
+.trend-wrap{position:relative;height:200px}
+.section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.day-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:22px}
+.day-btn{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:8px 6px;cursor:pointer;text-align:center;transition:.12s}
+.day-btn:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(0,39,45,.1)}
+.day-btn.active{background:var(--teal);border-color:var(--teal)}
+.day-btn .db-date{font-size:10px;font-weight:700;color:var(--text);line-height:1.2}
+.day-btn.active .db-date{color:#fff}
+.day-btn .db-dow{font-size:8px;font-weight:600;color:var(--muted);margin-top:1px;letter-spacing:.04em}
+.day-btn.active .db-dow{color:rgba(255,255,255,.7)}
+.day-btn .db-nc{font-size:9px;font-weight:800;margin-top:5px;padding:1px 5px;border-radius:8px;display:inline-block}
+.nc-red{background:var(--red-lt);color:#991b1b}
+.nc-amber{background:var(--amber-lt);color:#92400e}
+.nc-green{background:var(--green-lt);color:#166534}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.chart-wrap{position:relative;height:190px}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 16px;border-top:1px solid var(--border);background:#fafbfc}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.b-c{background:var(--green-lt);color:#166534}.d-c{background:var(--green)}
+.b-vm{background:var(--amber-lt);color:#92400e}.d-vm{background:var(--amber)}
+.b-a{background:var(--red-lt);color:#991b1b}.d-a{background:var(--red)}
+.q-table{width:100%;border-collapse:collapse;font-size:11px}
+.q-table thead tr{background:var(--dark)}
+.q-table thead th{padding:8px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#fff;white-space:nowrap}
+.q-table thead th.r{text-align:right}
+.q-table tbody tr{border-bottom:1px solid var(--border)}
+.q-table tbody tr:last-child{border-bottom:none}
+.q-table tbody tr:hover{background:#f0f8f9}
+.q-table tbody td{padding:8px 12px;color:var(--text);font-weight:500;vertical-align:middle}
+.q-table tbody td.r{text-align:right}
+.nc-pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:99px;font-size:9px;font-weight:700}
+.pill-red{background:var(--red-lt);color:#991b1b}.pill-amber{background:var(--amber-lt);color:#92400e}.pill-green{background:var(--green-lt);color:#166534}
+.bar-wrap{width:60px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;display:inline-block;margin-right:5px;vertical-align:middle}
+.bar-fill{height:100%;border-radius:99px}
+.day-note{font-size:11px;color:var(--muted);border-left:3px solid var(--gold);padding:8px 12px;background:var(--gold-lt);border-radius:0 6px 6px 0;margin-bottom:14px;font-weight:500;line-height:1.6}
+.day-note strong{color:var(--text)}
+.footer{text-align:center;font-size:10px;color:var(--muted);padding-top:20px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px}
+@media(max-width:700px){.two-col,.summary-row{grid-template-columns:1fr}.day-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.page,.header,.alert{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="header-title">WPN Daily Monitor</div><div class="header-sub">Aug 2 – 25, 2026 &nbsp;·&nbsp; Central Time</div></div>
+  <div class="status-pill"><span class="status-dot"></span>Under Active Monitoring</div>
+</div>
+<div class="alert">⚠ &nbsp;33% overall NC rate across 24 days. Sundays and select Mondays are the most acute problem days.</div>
+<div class="page">
+  <div class="summary-row">
+    <div class="sc"><div class="sc-label">Total calls</div><div class="sc-value teal">1,621</div><div class="sc-sub">Aug 2 – 25, 2026</div></div>
+    <div class="sc"><div class="sc-label">Completed</div><div class="sc-value green">1,079</div><div class="sc-sub">67% completion rate</div></div>
+    <div class="sc"><div class="sc-label">Not completed</div><div class="sc-value red">542</div><div class="sc-sub">33% NC rate overall</div></div>
+    <div class="sc"><div class="sc-label">Days above 40% NC</div><div class="sc-value red">4</div><div class="sc-sub">8/2 · 8/10 · 8/15 · 8/23</div></div>
+  </div>
+  <div class="trend-panel">
+    <div class="panel-header">
+      <div class="panel-title"><span class="panel-dot" style="background:var(--teal)"></span>Daily NC rate — Aug 2–25</div>
+      <div class="panel-meta">33% avg &nbsp;·&nbsp; click a bar to jump to that day</div>
+    </div>
+    <div class="panel-body"><div class="trend-wrap"><canvas id="trendChart"></canvas></div></div>
+  </div>
+  <div class="section-label">Select a day</div>
+  <div class="day-grid" id="dayGrid"></div>
+  <div id="dayDetail"></div>
+  <div class="footer">WPN Call Dashboard &nbsp;·&nbsp; Northgate Resorts &nbsp;·&nbsp; Central Time</div>
+</div>
+<script>
+const DAYS=[{"date":"2026-08-02","dow":"Sunday","total":112,"completed":35,"voicemail":66,"abandoned":11,"nc":77,"nc_pct":69,"hours":{"9":21,"10":13,"11":10,"12":12,"13":8,"14":9,"15":7,"16":17,"17":6,"18":9},"h_completed":{"9":1,"10":1,"11":4,"12":8,"13":7,"14":6,"15":3,"17":1,"18":4},"h_voicemail":{"9":16,"10":12,"11":5,"12":4,"14":3,"15":3,"16":14,"17":5,"18":4},"h_abandoned":{"9":4,"11":1,"13":1,"15":1,"16":3,"18":1},"queues":[{"name":"WPN ZCC Overflow","total":45,"completed":5,"voicemail":38,"abandoned":2,"nc":40},{"name":"WPN New Reservation","total":29,"completed":11,"voicemail":15,"abandoned":3,"nc":18},{"name":"WPN In Park","total":18,"completed":9,"voicemail":7,"abandoned":2,"nc":9},{"name":"WPN Modify Reservation","total":17,"completed":9,"voicemail":5,"abandoned":3,"nc":8},{"name":"WPN Extended Stay","total":3,"completed":1,"voicemail":1,"abandoned":1,"nc":2}]},{"date":"2026-08-03","dow":"Monday","total":76,"completed":71,"voicemail":5,"abandoned":0,"nc":5,"nc_pct":7,"hours":{"9":15,"10":10,"11":8,"12":5,"13":5,"14":7,"15":8,"16":5,"17":6,"18":7},"h_completed":{"9":12,"10":10,"11":8,"12":5,"13":5,"14":7,"15":8,"16":5,"17":6,"18":5},"h_voicemail":{"9":3,"18":2},"h_abandoned":{},"queues":[{"name":"WPN New Reservation","total":43,"completed":41,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN In Park","total":12,"completed":11,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN Modify Reservation","total":11,"completed":11,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":5,"completed":4,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN ZCC Overflow","total":5,"completed":4,"voicemail":1,"abandoned":0,"nc":1}]},{"date":"2026-08-04","dow":"Tuesday","total":92,"completed":60,"voicemail":25,"abandoned":7,"nc":32,"nc_pct":35,"hours":{"9":16,"10":14,"11":9,"12":9,"13":13,"14":11,"15":8,"16":6,"17":5,"18":1},"h_completed":{"9":13,"10":6,"11":3,"12":5,"13":9,"14":8,"15":8,"16":4,"17":3,"18":1},"h_voicemail":{"9":2,"10":8,"11":4,"12":4,"13":2,"14":2,"16":2,"17":1},"h_abandoned":{"9":1,"11":2,"13":2,"14":1,"17":1},"queues":[{"name":"WPN New Reservation","total":39,"completed":28,"voicemail":7,"abandoned":4,"nc":11},{"name":"WPN ZCC Overflow","total":21,"completed":7,"voicemail":12,"abandoned":2,"nc":14},{"name":"WPN In Park","total":18,"completed":14,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN Modify Reservation","total":14,"completed":11,"voicemail":2,"abandoned":1,"nc":3}]},{"date":"2026-08-05","dow":"Wednesday","total":69,"completed":47,"voicemail":15,"abandoned":7,"nc":22,"nc_pct":32,"hours":{"9":7,"10":12,"11":14,"12":7,"13":7,"14":4,"15":8,"16":5,"17":1,"18":4},"h_completed":{"9":7,"10":6,"11":10,"12":5,"13":2,"14":3,"15":5,"16":5,"17":1,"18":3},"h_voicemail":{"10":5,"11":2,"12":2,"13":3,"15":2,"18":1},"h_abandoned":{"10":1,"11":2,"13":2,"14":1,"15":1},"queues":[{"name":"WPN New Reservation","total":28,"completed":21,"voicemail":4,"abandoned":3,"nc":7},{"name":"WPN ZCC Overflow","total":17,"completed":6,"voicemail":10,"abandoned":1,"nc":11},{"name":"WPN In Park","total":15,"completed":13,"voicemail":0,"abandoned":2,"nc":2},{"name":"WPN Modify Reservation","total":8,"completed":6,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN Extended Stay","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-06","dow":"Thursday","total":106,"completed":98,"voicemail":7,"abandoned":1,"nc":8,"nc_pct":8,"hours":{"9":9,"10":13,"11":9,"12":10,"13":11,"14":10,"15":8,"16":17,"17":15,"18":4},"h_completed":{"9":9,"10":11,"11":8,"12":9,"13":11,"14":9,"15":8,"16":16,"17":13,"18":4},"h_voicemail":{"10":1,"11":1,"12":1,"14":1,"16":1,"17":2},"h_abandoned":{"10":1},"queues":[{"name":"WPN New Reservation","total":48,"completed":48,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Modify Reservation","total":27,"completed":24,"voicemail":2,"abandoned":1,"nc":3},{"name":"WPN In Park","total":19,"completed":19,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN ZCC Overflow","total":11,"completed":6,"voicemail":5,"abandoned":0,"nc":5},{"name":"WPN Extended Stay","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-07","dow":"Friday","total":137,"completed":83,"voicemail":46,"abandoned":8,"nc":54,"nc_pct":39,"hours":{"9":21,"10":26,"11":21,"12":17,"13":10,"14":7,"15":10,"16":11,"17":8,"18":6},"h_completed":{"9":6,"10":10,"11":12,"12":9,"13":8,"14":6,"15":8,"16":11,"17":8,"18":5},"h_voicemail":{"9":15,"10":13,"11":5,"12":8,"13":2,"14":1,"15":2},"h_abandoned":{"10":3,"11":4,"18":1},"queues":[{"name":"WPN New Reservation","total":47,"completed":36,"voicemail":9,"abandoned":2,"nc":11},{"name":"WPN ZCC Overflow","total":41,"completed":10,"voicemail":26,"abandoned":5,"nc":31},{"name":"WPN In Park","total":31,"completed":22,"voicemail":8,"abandoned":1,"nc":9},{"name":"WPN Modify Reservation","total":14,"completed":11,"voicemail":3,"abandoned":0,"nc":3},{"name":"WPN Extended Stay","total":4,"completed":4,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-08","dow":"Saturday","total":94,"completed":65,"voicemail":23,"abandoned":6,"nc":29,"nc_pct":31,"hours":{"9":8,"10":16,"11":15,"12":5,"13":16,"14":13,"15":3,"16":8,"17":4,"18":5,"19":1},"h_completed":{"9":2,"10":8,"11":11,"12":4,"13":12,"14":9,"15":3,"16":8,"17":3,"18":5},"h_voicemail":{"9":5,"10":6,"11":4,"12":1,"13":2,"14":4,"19":1},"h_abandoned":{"9":1,"10":2,"13":2,"17":1},"queues":[{"name":"WPN New Reservation","total":43,"completed":35,"voicemail":6,"abandoned":2,"nc":8},{"name":"WPN In Park","total":21,"completed":17,"voicemail":2,"abandoned":2,"nc":4},{"name":"WPN ZCC Overflow","total":20,"completed":4,"voicemail":14,"abandoned":2,"nc":16},{"name":"WPN Modify Reservation","total":8,"completed":8,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":2,"completed":1,"voicemail":1,"abandoned":0,"nc":1}]},{"date":"2026-08-09","dow":"Sunday","total":49,"completed":35,"voicemail":11,"abandoned":3,"nc":14,"nc_pct":29,"hours":{"9":7,"10":8,"11":4,"12":8,"13":12,"14":6,"15":4},"h_completed":{"9":7,"10":7,"11":3,"12":4,"13":7,"14":3,"15":4},"h_voicemail":{"10":1,"11":1,"12":3,"13":4,"14":2},"h_abandoned":{"12":1,"13":1,"14":1},"queues":[{"name":"WPN New Reservation","total":19,"completed":15,"voicemail":2,"abandoned":2,"nc":4},{"name":"WPN In Park","total":15,"completed":11,"voicemail":3,"abandoned":1,"nc":4},{"name":"WPN ZCC Overflow","total":8,"completed":3,"voicemail":5,"abandoned":0,"nc":5},{"name":"WPN Modify Reservation","total":5,"completed":5,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":2,"completed":1,"voicemail":1,"abandoned":0,"nc":1}]},{"date":"2026-08-10","dow":"Monday","total":76,"completed":23,"voicemail":47,"abandoned":6,"nc":53,"nc_pct":70,"hours":{"9":12,"10":12,"11":14,"12":7,"13":11,"14":5,"15":5,"16":10},"h_completed":{"9":2,"10":3,"11":5,"12":3,"13":3,"14":2,"15":2,"16":3},"h_voicemail":{"9":9,"10":7,"11":9,"12":3,"13":8,"14":3,"15":1,"16":7},"h_abandoned":{"9":1,"10":2,"12":1,"15":2},"queues":[{"name":"WPN ZCC Overflow","total":35,"completed":5,"voicemail":29,"abandoned":1,"nc":30},{"name":"WPN New Reservation","total":16,"completed":7,"voicemail":9,"abandoned":0,"nc":9},{"name":"WPN Modify Reservation","total":12,"completed":7,"voicemail":4,"abandoned":1,"nc":5},{"name":"WPN In Park","total":10,"completed":3,"voicemail":4,"abandoned":3,"nc":7},{"name":"WPN Extended Stay","total":3,"completed":1,"voicemail":1,"abandoned":1,"nc":2}]},{"date":"2026-08-11","dow":"Tuesday","total":47,"completed":34,"voicemail":12,"abandoned":1,"nc":13,"nc_pct":28,"hours":{"9":3,"10":9,"11":7,"12":4,"13":7,"14":10,"15":4,"16":3},"h_completed":{"9":3,"10":7,"11":5,"12":4,"13":7,"14":3,"15":2,"16":3},"h_voicemail":{"10":2,"11":2,"14":7,"15":1},"h_abandoned":{"15":1},"queues":[{"name":"WPN New Reservation","total":23,"completed":18,"voicemail":4,"abandoned":1,"nc":5},{"name":"WPN ZCC Overflow","total":9,"completed":2,"voicemail":7,"abandoned":0,"nc":7},{"name":"WPN Modify Reservation","total":7,"completed":7,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN In Park","total":5,"completed":4,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN Extended Stay","total":3,"completed":3,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-12","dow":"Wednesday","total":41,"completed":35,"voicemail":4,"abandoned":2,"nc":6,"nc_pct":15,"hours":{"9":3,"10":4,"11":7,"12":5,"13":8,"14":3,"15":7,"16":4},"h_completed":{"9":3,"10":4,"11":5,"12":5,"13":6,"14":3,"15":6,"16":3},"h_voicemail":{"11":1,"13":2,"16":1},"h_abandoned":{"11":1,"15":1},"queues":[{"name":"WPN New Reservation","total":14,"completed":13,"voicemail":0,"abandoned":1,"nc":1},{"name":"WPN ZCC Overflow","total":9,"completed":5,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN In Park","total":8,"completed":7,"voicemail":0,"abandoned":1,"nc":1},{"name":"WPN Modify Reservation","total":6,"completed":6,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":4,"completed":4,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-13","dow":"Thursday","total":51,"completed":41,"voicemail":9,"abandoned":1,"nc":10,"nc_pct":20,"hours":{"9":7,"10":7,"11":6,"12":5,"13":4,"14":10,"15":7,"16":5},"h_completed":{"9":7,"10":5,"11":6,"12":5,"13":3,"14":5,"15":5,"16":5},"h_voicemail":{"10":2,"13":1,"14":5,"15":1},"h_abandoned":{"15":1},"queues":[{"name":"WPN New Reservation","total":22,"completed":20,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN Modify Reservation","total":13,"completed":11,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN In Park","total":7,"completed":6,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN ZCC Overflow","total":7,"completed":3,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN Extended Stay","total":2,"completed":1,"voicemail":0,"abandoned":1,"nc":1}]},{"date":"2026-08-14","dow":"Friday","total":120,"completed":98,"voicemail":18,"abandoned":4,"nc":22,"nc_pct":18,"hours":{"9":18,"10":10,"11":2,"12":21,"13":12,"14":11,"15":12,"16":18,"17":10,"18":5,"19":1},"h_completed":{"9":14,"10":7,"11":2,"12":16,"13":8,"14":11,"15":10,"16":15,"17":10,"18":5},"h_voicemail":{"9":3,"10":2,"12":4,"13":3,"15":2,"16":3,"19":1},"h_abandoned":{"9":1,"10":1,"12":1,"13":1},"queues":[{"name":"WPN New Reservation","total":55,"completed":51,"voicemail":2,"abandoned":2,"nc":4},{"name":"WPN In Park","total":26,"completed":20,"voicemail":6,"abandoned":0,"nc":6},{"name":"WPN Modify Reservation","total":20,"completed":17,"voicemail":2,"abandoned":1,"nc":3},{"name":"WPN ZCC Overflow","total":16,"completed":7,"voicemail":8,"abandoned":1,"nc":9},{"name":"WPN Extended Stay","total":3,"completed":3,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-15","dow":"Saturday","total":108,"completed":46,"voicemail":45,"abandoned":17,"nc":62,"nc_pct":57,"hours":{"9":28,"10":18,"11":20,"12":12,"13":8,"14":5,"15":3,"16":9,"17":4,"18":1},"h_completed":{"9":3,"10":9,"11":6,"12":4,"13":4,"14":5,"15":3,"16":8,"17":4},"h_voicemail":{"9":20,"10":6,"11":11,"12":4,"13":3,"18":1},"h_abandoned":{"9":5,"10":3,"11":3,"12":4,"13":1,"16":1},"queues":[{"name":"WPN ZCC Overflow","total":43,"completed":5,"voicemail":29,"abandoned":9,"nc":38},{"name":"WPN New Reservation","total":36,"completed":20,"voicemail":10,"abandoned":6,"nc":16},{"name":"WPN In Park","total":16,"completed":12,"voicemail":3,"abandoned":1,"nc":4},{"name":"WPN Modify Reservation","total":9,"completed":7,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN Extended Stay","total":4,"completed":2,"voicemail":2,"abandoned":0,"nc":2}]},{"date":"2026-08-16","dow":"Sunday","total":45,"completed":34,"voicemail":9,"abandoned":2,"nc":11,"nc_pct":24,"hours":{"9":15,"10":7,"11":6,"12":3,"13":5,"14":5,"15":4},"h_completed":{"9":9,"10":3,"11":5,"12":3,"13":5,"14":5,"15":4},"h_voicemail":{"9":5,"10":3,"11":1},"h_abandoned":{"9":1,"10":1},"queues":[{"name":"WPN New Reservation","total":15,"completed":13,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN In Park","total":14,"completed":12,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN ZCC Overflow","total":12,"completed":6,"voicemail":6,"abandoned":0,"nc":6},{"name":"WPN Modify Reservation","total":4,"completed":3,"voicemail":0,"abandoned":1,"nc":1}]},{"date":"2026-08-17","dow":"Monday","total":33,"completed":23,"voicemail":7,"abandoned":3,"nc":10,"nc_pct":30,"hours":{"9":7,"10":1,"11":5,"12":4,"13":4,"14":5,"15":2,"16":5},"h_completed":{"9":5,"10":1,"11":2,"12":2,"13":2,"14":5,"15":2,"16":4},"h_voicemail":{"9":1,"11":2,"12":2,"13":2},"h_abandoned":{"9":1,"11":1,"16":1},"queues":[{"name":"WPN New Reservation","total":11,"completed":7,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN Modify Reservation","total":7,"completed":7,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN In Park","total":6,"completed":4,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN ZCC Overflow","total":5,"completed":2,"voicemail":2,"abandoned":1,"nc":3},{"name":"WPN Extended Stay","total":4,"completed":3,"voicemail":0,"abandoned":1,"nc":1}]},{"date":"2026-08-18","dow":"Tuesday","total":33,"completed":25,"voicemail":7,"abandoned":1,"nc":8,"nc_pct":24,"hours":{"9":4,"10":5,"11":5,"12":1,"13":9,"14":4,"15":3,"16":2},"h_completed":{"9":3,"10":3,"11":3,"12":1,"13":8,"14":3,"15":3,"16":1},"h_voicemail":{"10":2,"11":2,"13":1,"14":1,"16":1},"h_abandoned":{"9":1},"queues":[{"name":"WPN New Reservation","total":20,"completed":17,"voicemail":2,"abandoned":1,"nc":3},{"name":"WPN ZCC Overflow","total":6,"completed":3,"voicemail":3,"abandoned":0,"nc":3},{"name":"WPN Modify Reservation","total":4,"completed":2,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN In Park","total":3,"completed":3,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-19","dow":"Wednesday","total":34,"completed":29,"voicemail":4,"abandoned":1,"nc":5,"nc_pct":15,"hours":{"9":10,"10":3,"11":2,"12":2,"13":2,"14":2,"15":8,"16":5},"h_completed":{"9":10,"10":3,"11":2,"12":2,"13":2,"14":2,"15":5,"16":3},"h_voicemail":{"15":2,"16":2},"h_abandoned":{"15":1},"queues":[{"name":"WPN New Reservation","total":20,"completed":18,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN Modify Reservation","total":6,"completed":6,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN ZCC Overflow","total":5,"completed":2,"voicemail":3,"abandoned":0,"nc":3},{"name":"WPN In Park","total":2,"completed":2,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-20","dow":"Thursday","total":52,"completed":33,"voicemail":17,"abandoned":2,"nc":19,"nc_pct":37,"hours":{"9":8,"10":4,"11":12,"12":5,"13":14,"14":5,"15":3,"16":1},"h_completed":{"9":8,"10":3,"11":8,"12":4,"13":4,"14":2,"15":3,"16":1},"h_voicemail":{"10":1,"11":4,"13":9,"14":3},"h_abandoned":{"12":1,"13":1},"queues":[{"name":"WPN New Reservation","total":19,"completed":13,"voicemail":5,"abandoned":1,"nc":6},{"name":"WPN ZCC Overflow","total":13,"completed":4,"voicemail":8,"abandoned":1,"nc":9},{"name":"WPN Modify Reservation","total":10,"completed":6,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN In Park","total":6,"completed":6,"voicemail":0,"abandoned":0,"nc":0},{"name":"WPN Extended Stay","total":4,"completed":4,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-21","dow":"Friday","total":70,"completed":56,"voicemail":12,"abandoned":2,"nc":14,"nc_pct":20,"hours":{"9":9,"10":4,"11":3,"12":9,"13":8,"14":7,"15":4,"16":12,"17":8,"18":6},"h_completed":{"9":8,"10":4,"11":3,"12":8,"13":8,"14":5,"15":4,"16":7,"17":4,"18":5},"h_voicemail":{"9":1,"14":2,"16":5,"17":3,"18":1},"h_abandoned":{"12":1,"17":1},"queues":[{"name":"WPN New Reservation","total":24,"completed":22,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN In Park","total":16,"completed":13,"voicemail":2,"abandoned":1,"nc":3},{"name":"WPN Modify Reservation","total":14,"completed":12,"voicemail":2,"abandoned":0,"nc":2},{"name":"WPN ZCC Overflow","total":14,"completed":7,"voicemail":6,"abandoned":1,"nc":7},{"name":"WPN Extended Stay","total":2,"completed":2,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-22","dow":"Saturday","total":69,"completed":48,"voicemail":14,"abandoned":7,"nc":21,"nc_pct":30,"hours":{"9":13,"10":11,"11":14,"12":6,"13":7,"14":4,"15":6,"16":4,"17":4},"h_completed":{"9":8,"10":10,"11":11,"12":4,"13":4,"14":2,"15":4,"16":1,"17":4},"h_voicemail":{"9":2,"10":1,"11":3,"12":2,"13":3,"14":1,"15":1,"16":1},"h_abandoned":{"9":3,"14":1,"15":1,"16":2},"queues":[{"name":"WPN New Reservation","total":27,"completed":18,"voicemail":7,"abandoned":2,"nc":9},{"name":"WPN In Park","total":21,"completed":16,"voicemail":2,"abandoned":3,"nc":5},{"name":"WPN ZCC Overflow","total":11,"completed":5,"voicemail":5,"abandoned":1,"nc":6},{"name":"WPN Modify Reservation","total":9,"completed":8,"voicemail":0,"abandoned":1,"nc":1},{"name":"WPN Extended Stay","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-23","dow":"Sunday","total":42,"completed":14,"voicemail":27,"abandoned":1,"nc":28,"nc_pct":67,"hours":{"9":4,"10":3,"11":10,"12":7,"13":7,"14":8,"15":1,"16":2},"h_completed":{"9":1,"10":2,"11":2,"12":1,"14":6,"15":1,"16":1},"h_voicemail":{"9":2,"10":1,"11":8,"12":6,"13":7,"14":2,"16":1},"h_abandoned":{"9":1},"queues":[{"name":"WPN ZCC Overflow","total":14,"completed":1,"voicemail":13,"abandoned":0,"nc":13},{"name":"WPN New Reservation","total":13,"completed":7,"voicemail":6,"abandoned":0,"nc":6},{"name":"WPN In Park","total":8,"completed":4,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN Modify Reservation","total":6,"completed":1,"voicemail":4,"abandoned":1,"nc":5},{"name":"WPN Extended Stay","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-24","dow":"Monday","total":34,"completed":25,"voicemail":8,"abandoned":1,"nc":9,"nc_pct":26,"hours":{"9":4,"10":4,"11":3,"12":3,"13":5,"14":5,"15":3,"16":7},"h_completed":{"9":3,"10":3,"11":3,"12":3,"13":5,"14":2,"15":3,"16":3},"h_voicemail":{"9":1,"10":1,"14":3,"16":3},"h_abandoned":{"16":1},"queues":[{"name":"WPN New Reservation","total":11,"completed":10,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN Modify Reservation","total":9,"completed":8,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN ZCC Overflow","total":8,"completed":3,"voicemail":5,"abandoned":0,"nc":5},{"name":"WPN In Park","total":4,"completed":2,"voicemail":1,"abandoned":1,"nc":2},{"name":"WPN Extended Stay","total":2,"completed":2,"voicemail":0,"abandoned":0,"nc":0}]},{"date":"2026-08-25","dow":"Tuesday","total":31,"completed":21,"voicemail":7,"abandoned":3,"nc":10,"nc_pct":32,"hours":{"9":3,"10":2,"11":2,"12":3,"13":7,"14":4,"15":6,"16":4},"h_completed":{"9":2,"10":2,"11":2,"12":3,"13":6,"14":3,"15":1,"16":2},"h_voicemail":{"9":1,"13":1,"14":1,"15":3,"16":1},"h_abandoned":{"15":2,"16":1},"queues":[{"name":"WPN New Reservation","total":16,"completed":12,"voicemail":1,"abandoned":3,"nc":4},{"name":"WPN ZCC Overflow","total":8,"completed":4,"voicemail":4,"abandoned":0,"nc":4},{"name":"WPN Modify Reservation","total":4,"completed":3,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN Extended Stay","total":2,"completed":1,"voicemail":1,"abandoned":0,"nc":1},{"name":"WPN In Park","total":1,"completed":1,"voicemail":0,"abandoned":0,"nc":0}]}];
+
+const HL={8:'8a',9:'9a',10:'10a',11:'11a',12:'12p',13:'1p',14:'2p',15:'3p',16:'4p',17:'5p',18:'6p',19:'7p'};
+let activeIdx=0,hChart=null,ncChart=null,trendChart=null;
+function ncClass(r){return r>=40?'nc-red':r>=20?'nc-amber':'nc-green'}
+function pillClass(r){return r>=40?'pill-red':r>=20?'pill-amber':'pill-green'}
+function barColor(r){return r>=40?'#c0392b':r>=20?'#f59e0b':'#16a34a'}
+function buildTrend(){
+  const labels=DAYS.map(d=>d.date.slice(5));
+  const rates=DAYS.map(d=>d.nc_pct);
+  const colors=rates.map(r=>r>=40?'#c0392b':r>=20?'#f59e0b':'#22c55e');
+  trendChart=new Chart(document.getElementById('trendChart'),{type:'bar',
+    data:{labels,datasets:[{data:rates,backgroundColor:colors,borderRadius:3,borderWidth:0,borderColor:'transparent'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:i=>{const d=DAYS[i[0].dataIndex];return d.dow+' '+d.date;},
+        label:i=>'NC: '+i.raw+'% ('+DAYS[i.dataIndex].nc+' of '+DAYS[i.dataIndex].total+' calls)'
+      }}},
+      onClick:(_,els)=>{if(els.length)switchDay(els[0].index);},
+      scales:{x:{grid:{display:false},ticks:{font:{size:8,family:'Montserrat',weight:'600'},color:'#6b7f86',maxRotation:45}},
+              y:{max:100,grid:{color:'rgba(0,39,45,.05)'},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86',callback:v=>v+'%'}}}}});
+}
+function buildGrid(){
+  const grid=document.getElementById('dayGrid');
+  DAYS.forEach((d,i)=>{
+    const btn=document.createElement('div');
+    btn.className='day-btn'+(i===activeIdx?' active':'');
+    btn.dataset.idx=i;
+    btn.innerHTML='<div class="db-date">'+d.date.slice(5)+'</div><div class="db-dow">'+d.dow.slice(0,3).toUpperCase()+'</div><div class="db-nc '+ncClass(d.nc_pct)+'">'+d.nc_pct+'%</div>';
+    btn.onclick=()=>switchDay(i);
+    grid.appendChild(btn);
+  });
+}
+function buildNote(d){
+  const entries=Object.entries(d.hours).sort((a,b)=>b[1]-a[1]);
+  const wh=entries[0];
+  const whNC=(d.h_voicemail[wh[0]]||0)+(d.h_abandoned[wh[0]]||0);
+  const wq=d.queues[0];
+  const tone=d.nc_pct>=50?'🔴 <strong>Critical</strong>':d.nc_pct>=30?'🟠 <strong>Elevated</strong>':'🟢 <strong>Acceptable</strong>';
+  return tone+' — '+d.nc_pct+'% NC rate. Busiest hour: '+(HL[wh[0]]||wh[0])+' ('+wh[1]+' calls, '+whNC+' not completed). Top queue: '+wq.name.replace('WPN ','')+' — '+wq.nc+' NC of '+wq.total+' calls ('+Math.round(wq.nc/wq.total*100)+'% NC).';
+}
+function buildDay(idx){
+  const d=DAYS[idx];
+  const hours=Object.keys(d.hours).map(Number).sort((a,b)=>a-b);
+  const pct=v=>d.total?Math.round(v/d.total*100):0;
+  let qrows='';
+  d.queues.forEach(q=>{
+    const r=q.total?Math.round(q.nc/q.total*100):0;
+    qrows+='<tr><td><strong>'+q.name.replace('WPN ','')+'</strong></td><td class="r">'+q.total+'</td><td class="r">'+q.completed+'</td><td class="r">'+q.voicemail+'</td><td class="r">'+q.abandoned+'</td><td><span class="bar-wrap"><span class="bar-fill" style="width:'+Math.min(r,100)+'%;background:'+barColor(r)+'"></span></span><span class="nc-pill '+pillClass(r)+'">'+r+'%</span></td></tr>';
+  });
+  document.getElementById('dayDetail').innerHTML=
+    '<div class="day-note">'+buildNote(d)+'</div>'+
+    '<div class="two-col">'+
+      '<div class="panel"><div class="panel-header"><div class="panel-title"><span class="panel-dot" style="background:var(--teal)"></span>All calls by hour</div><div class="panel-meta">'+d.total+' calls</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="hChart"></canvas></div></div><div class="badge-row"><span class="badge b-c"><span class="dot d-c"></span>Completed: '+d.completed+' ('+pct(d.completed)+'%)</span><span class="badge b-vm"><span class="dot d-vm"></span>Voicemail/OVF: '+d.voicemail+' ('+pct(d.voicemail)+'%)</span><span class="badge b-a"><span class="dot d-a"></span>Abandoned: '+d.abandoned+' ('+pct(d.abandoned)+'%)</span></div></div>'+
+      '<div class="panel"><div class="panel-header"><div class="panel-title"><span class="panel-dot" style="background:var(--red)"></span>Not completed by hour</div><div class="panel-meta">'+d.nc+' calls · '+d.nc_pct+'% NC</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="ncChart"></canvas></div></div><div class="badge-row"><span class="badge b-vm"><span class="dot d-vm"></span>Voicemail/OVF: '+d.voicemail+'</span><span class="badge b-a"><span class="dot d-a"></span>Abandoned: '+d.abandoned+'</span></div></div>'+
+    '</div>'+
+    '<div class="panel" style="margin-bottom:0"><div class="panel-header"><div class="panel-title"><span class="panel-dot" style="background:var(--gold)"></span>Queue breakdown</div><div class="panel-meta">'+d.queues.length+' queues</div></div><table class="q-table"><thead><tr><th>Queue</th><th class="r">Total</th><th class="r">Completed</th><th class="r">Voicemail/OVF</th><th class="r">Abandoned</th><th>NC Rate</th></tr></thead><tbody>'+qrows+'</tbody></table></div>';
+  if(hChart)hChart.destroy();
+  if(ncChart)ncChart.destroy();
+  const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9,family:'Montserrat'},boxWidth:10,padding:8}}},scales:{x:{grid:{display:false},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true},y:{grid:{color:'rgba(0,39,45,.05)'},ticks:{font:{size:9,family:'Montserrat',weight:'600'},color:'#6b7f86'},stacked:true}}};
+  hChart=new Chart(document.getElementById('hChart'),{type:'bar',data:{labels:hours.map(h=>HL[h]||h),datasets:[{label:'Completed',data:hours.map(h=>d.h_completed[h]||0),backgroundColor:'#16a34a',borderRadius:3,stack:'s'},{label:'Voicemail/OVF',data:hours.map(h=>d.h_voicemail[h]||0),backgroundColor:'#f59e0b',stack:'s'},{label:'Abandoned',data:hours.map(h=>d.h_abandoned[h]||0),backgroundColor:'#c0392b',stack:'s'}]},options:chartOpts});
+  ncChart=new Chart(document.getElementById('ncChart'),{type:'bar',data:{labels:hours.map(h=>HL[h]||h),datasets:[{label:'Voicemail/OVF',data:hours.map(h=>d.h_voicemail[h]||0),backgroundColor:'#f59e0b',borderRadius:3,stack:'s'},{label:'Abandoned',data:hours.map(h=>d.h_abandoned[h]||0),backgroundColor:'#c0392b',stack:'s'}]},options:chartOpts});
+  if(trendChart){trendChart.data.datasets[0].borderWidth=DAYS.map((_,i)=>i===idx?3:0);trendChart.data.datasets[0].borderColor=DAYS.map((_,i)=>i===idx?'#fff':'transparent');trendChart.update('none');}
+}
+function switchDay(idx){
+  activeIdx=idx;
+  document.querySelectorAll('.day-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  buildDay(idx);
+  document.getElementById('dayDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+buildTrend();buildGrid();buildDay(0);
+<\/script>
+</body>
+</html>
